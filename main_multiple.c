@@ -60,7 +60,8 @@ int main(void){
 
 
         struct sigaction sa;
-        sigaction(SIGINT, NULL, &sa);
+        memset(&sa, 0, sizeof(sa));
+        //sigaction(SIGINT, NULL, &sa);
         sa.sa_handler = sig_handler;
         sigaction(SIGINT, &sa, NULL);
 
