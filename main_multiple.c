@@ -31,7 +31,13 @@ char* shell_prompt(){
     }
 }
 
-void sig_handler(){
+void sig_handler(int signum){
+
+    if(signum == SIGUSR1){
+        printf("SIGNAL RECEIVED\n");
+        printf("check r is %d\n",rec);
+        rec = 1;
+    }
 
 }
 
@@ -46,7 +52,7 @@ int main(void){
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
         char *inputs={NULL,};
-        int i = 0;
+        int i = 0, pipe = 0;
 
 
         inputs = shell_prompt(); // prompt display
@@ -86,9 +92,11 @@ int main(void){
 
 
         int j = 0;
+
         while(j < i){
             in_put[j] = input_cmd[j];
-            printf("%s\n",in_put[j]);
+            if(strcmp(in_put[j],"|") == 0)
+                pipe++;
             j++;
         }
 
@@ -106,11 +114,14 @@ int main(void){
             }
         }
 
+        signal(SIGUSR1,sig_handler);
+
         pid = fork();
         if (pid <0){
             printf("fork: error no ");
             exit(-1);
         } else if (pid == 0) {
+            while(!rec);
 
             if(execvp(in_put[0],in_put) == -1){
                 printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
@@ -118,6 +129,7 @@ int main(void){
             }
 
         } else{
+            kill(pid, SIGUSR1);
             waitpid(pid,NULL,0);
             continue;
         }
