@@ -18,7 +18,7 @@ void terminate(){
 }
 
 char* shell_prompt(){
-    static char shell_cmd[MAX] ={0};
+    static  char shell_cmd[MAX] ={0};
     printf("$$ 3230shell ##");
     fgets(shell_cmd,MAX,stdin);
 
@@ -44,6 +44,7 @@ int main(void){
     while(1){
         int is_error = 0;
         char *input_cmd[MAX] = {NULL,};
+        char *in_put[MAX] ={NULL,};
         char *inputs={NULL,};
         int i = 0;
 
@@ -81,7 +82,8 @@ int main(void){
         if (is_error == 1)
             continue;
 
-        char *in_put[MAX] ={NULL,};
+
+
 
         int j = 0;
         while(j < i){
@@ -89,77 +91,9 @@ int main(void){
             printf("%s\n",in_put[j]);
             j++;
         }
-        in_put[j] = input_cmd[i];
 
-        /*
-        strncpy(pipe_parse,shell_cmd,strlen(shell_cmd));
+        in_put[j] = input_cmd[j];
 
-
-        int i =0;
-        char* ptr;
-        char* test =pipe_parse;
-        int pipe_cnt =0;
-
-
-        while((ptr=strsep(&test,"|")) != NULL) {
-
-            i++;
-
-            char check[MAX];
-            int count = 0;
-            strcpy(check,ptr);
-
-
-            for (int j = 0; j <strlen(check); j++){
-                if(isspace(check[j])!= 0){
-                    count++;
-                    }
-                }
-            printf("%s is a command\n\n\n",check);
-            int len = (int)strlen(check);
-
-
-            if ((len > 0 && len == count) || len == 0 && i > 1){
-                printf("3230shell: should not have two consecutive | without in-between command\n");
-                continue;
-                printf("test\n");
-            }
-
-            if((len == 0 && i == 1 )|| ( len == 0 && test == NULL)){
-                printf("ERROR!!!! | should not be place either at first or the last\n");
-                continue;
-                printf("test\n");
-            }
-
-            if(len > 0 && len != count){
-                pipe_cnt++;
-            }
-            }
-            printf("Normal Pipe is %d\n",pipe_cnt);
-
-
-        input_cmd[0] = strtok(inputs," ");
-
-
-        int i = 0;
-
-        while(input_cmd[i] != NULL){
-            i++;
-            input_cmd[i] = strtok(NULL," ");
-            if(input_cmd[i]== NULL){
-                break;
-            }
-        }
-
-
-        char *in_put[i+1];
-
-        int j = 0;
-        while(j < i){
-            in_put[j] = input_cmd[j];
-            j++;
-        }
-        in_put[j] = input_cmd[i];
 
         if (strcmp(in_put[0],"exit") == 0){
             if (i > 1){

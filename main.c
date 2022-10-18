@@ -63,7 +63,6 @@ int main(void){
         /* ----------------------------- */
 
         /* ----------------------------- */  // Command Input//
-
         char *in_put[i+1];
 
         int j = 0;
@@ -72,6 +71,7 @@ int main(void){
             j++;
         }
         in_put[j] = input_cmd[i];
+
 
         if (strcmp(in_put[0],"exit") == 0){
             if (i > 1){
