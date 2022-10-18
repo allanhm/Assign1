@@ -45,12 +45,12 @@ int main(void){
 
 
         inputs = shell_prompt(); // prompt display
+        printf("%s\n",inputs);
 
 
-        /*
 
         char pipe_parse[strlen(shell_cmd)];
-
+        /*
         strncpy(pipe_parse,shell_cmd,strlen(shell_cmd));
 
 
