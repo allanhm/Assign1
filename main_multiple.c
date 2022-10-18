@@ -38,14 +38,17 @@ void sig_handler(){
 
 int main(void){
 
-    char *inputs;
+
     pid_t pid;
-    char *input_cmd[MAX] = {NULL,};
+
     while(1){
+        int is_error = 0;
+        char *input_cmd[MAX] = {NULL,};
+        char *inputs={NULL,};
+        int i = 0;
 
 
         inputs = shell_prompt(); // prompt display
-        printf("%s\n",inputs);
 
 
 
@@ -55,26 +58,28 @@ int main(void){
 
         if (strcmp(input_cmd[0],"|") == 0){
             printf("Error! | cannot be placed at the front\n");
-            continue;
+            is_error = 1;
         }
 
-        int i = 0;
-
-        while(input_cmd[i] != NULL){
+        while(input_cmd[i] != NULL && is_error == 0){
             i++;
             input_cmd[i] = strtok(NULL," ");
-            if((strcmp(input_cmd[i],"|") ==0 && strcmp(input_cmd[i -1],"|") ==0)||strcmp(input_cmd[i],"||") ==0){
-                printf("3230shell: should not have two consecutive | without in-between command\n");
-                continue;
-            }
+
             if(input_cmd[i]== NULL){
                 if(strcmp(input_cmd[i -1],"|") ==0){
                     printf("Error! | cannot be placed at the back\n");
-                    continue;
+                    is_error = 1;
                 }
                 break;
             }
+            if((strcmp(input_cmd[i],"|") ==0 && strcmp(input_cmd[i -1],"|") ==0)||strcmp(input_cmd[i],"||") ==0){
+                printf("3230shell: should not have two consecutive | without in-between command\n");
+                is_error = 1;
+                break;
+            }
         }
+        if (is_error == 1)
+            continue;
 
         char *in_put[MAX] ={NULL,};
 
