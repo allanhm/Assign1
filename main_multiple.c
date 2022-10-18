@@ -39,7 +39,7 @@ void sig_handler(int signum){
         rec = 1;
     }
     if(signum == SIGINT){
-
+        printf("Wrong");
     }
 
 }
@@ -57,6 +57,7 @@ int main(void){
         char *in_put[MAX] ={NULL,};
         char *inputs={NULL,};
         int i = 0, pipe = 0;
+
 
         struct sigaction sa;
         sigaction(SIGINT, NULL, &sa);
