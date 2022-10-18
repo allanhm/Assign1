@@ -38,6 +38,9 @@ void sig_handler(int signum){
         printf("check r is %d\n",rec);
         rec = 1;
     }
+    if(signum == SIGINT){
+
+    }
 
 }
 
@@ -48,11 +51,17 @@ int main(void){
     pid_t pid;
 
     while(1){
+
         int is_error = 0;
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
         char *inputs={NULL,};
         int i = 0, pipe = 0;
+
+        struct sigaction sa;
+        sigaction(SIGINT, NULL, &sa);
+        sa.sa_handler = sig_handler;
+        sigaction(SIGINT, &sa, NULL);
 
 
         inputs = shell_prompt(); // prompt display
