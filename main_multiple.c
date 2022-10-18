@@ -39,6 +39,7 @@ void sig_handler(int signum){
     }
     if(signum == SIGINT){
         printf("\n");
+        shell_prompt();
     }
 
 }
