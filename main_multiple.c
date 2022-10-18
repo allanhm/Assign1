@@ -10,15 +10,25 @@
 #include <ctype.h>
 #define MAX 1024
 
-int rec = 0
+int rec = 0;
 
 void terminate(){
     printf("3230shell: Terminated");
     exit(0);
 }
 
-void shell_prompt(){
+char* shell_prompt(){
+    static char shell_cmd[MAX] ={0};
     printf("$$ 3230shell ##");
+    fgets(shell_cmd,MAX,stdin);
+
+    if(strlen(shell_cmd) == 1){
+        return shell_prompt();
+    }
+    else{
+        shell_cmd[strlen(shell_cmd)-1] = 0;
+        return shell_cmd;
+    }
 }
 
 void sig_handler(){
@@ -28,24 +38,16 @@ void sig_handler(){
 
 int main(void){
 
-    char shell_cmd[MAX];
     char *inputs;
     pid_t pid;
     char *input_cmd[MAX] = {NULL,};
     while(1){
 
 
-        shell_prompt(); // prompt display
+        inputs = shell_prompt(); // prompt display
 
 
-        // Command Input
-        fgets(shell_cmd,MAX,stdin);
-
-        shell_cmd[strlen(shell_cmd)-1] = 0;
-
-
-
-        inputs = shell_cmd;
+        /*
 
         char pipe_parse[strlen(shell_cmd)];
 
@@ -144,10 +146,10 @@ int main(void){
             waitpid(pid,NULL,0);
             continue;
         }
-    */
 
 
-    //}
+        */
+    }
 }
 
 
