@@ -60,7 +60,7 @@ int main(void){
         sigaction(SIGUSR1, NULL, &sa);
 
         sa.sa_handler = sig_handler;
-        sa.sa_flags = SA_NODEFER | SA_RESETHAND;
+        sa.sa_flags |= SA_RESETHAND;
 
 
 
