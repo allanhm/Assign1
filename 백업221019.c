@@ -9,7 +9,8 @@
 #include <signal.h>
 #define MAX 1024
 
-int rec = 0;
+int rec = 0, reset = 0;
+
 
 void terminate(){
     printf("3230shell: Terminated");
@@ -20,6 +21,11 @@ char* shell_prompt(){
     static  char shell_cmd[MAX] ={0};
     printf("$$ 3230shell ##");
     fgets(shell_cmd,MAX,stdin);
+    if (reset == 1){
+        reset = 0;
+        printf("\n");
+        return shell_prompt();
+    }
 
     if(strlen(shell_cmd) == 1){
         return shell_prompt();
@@ -36,8 +42,7 @@ void sig_handler(int signum){
         rec = 1;
     }
     if(signum == SIGINT){
-        printf("\n");
-        shell_prompt();
+        reset = 1;
     }
 
 }
@@ -49,7 +54,7 @@ int main(void){
         int is_error = 0;
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
-        char *inputs={NULL,};
+        //char *inputs;
         int i = 0, pipe = 0;
 
 
@@ -60,16 +65,15 @@ int main(void){
         sigaction(SIGUSR1, NULL, &sa);
 
         sa.sa_handler = sig_handler;
-        sa.sa_flags |= SA_RESETHAND;
-
-
 
         sigaction(SIGUSR1, &sa, NULL);
         sigaction(SIGINT, &sa, NULL);
 
-        inputs = shell_prompt(); // prompt display
+        char *inputs = shell_prompt(); // prompt display
 
-
+        //if (strcmp(inputs,"SIGINT")==0){
+        //    continue;
+       // }
 
 
 

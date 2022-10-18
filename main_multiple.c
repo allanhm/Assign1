@@ -23,6 +23,7 @@ char* shell_prompt(){
     fgets(shell_cmd,MAX,stdin);
     if (reset == 1){
         reset = 0;
+        printf("\n");
         return shell_prompt();
     }
 
@@ -64,9 +65,6 @@ int main(void){
         sigaction(SIGUSR1, NULL, &sa);
 
         sa.sa_handler = sig_handler;
-        //sa.sa_flags = SA_NODEFER;
-
-
 
         sigaction(SIGUSR1, &sa, NULL);
         sigaction(SIGINT, &sa, NULL);
