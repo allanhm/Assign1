@@ -49,7 +49,43 @@ int main(void){
 
 
 
-        char pipe_parse[strlen(shell_cmd)];
+
+
+        input_cmd[0] = strtok(inputs," ");
+
+        if (strcmp(input_cmd[0],"|") == 0){
+            printf("Error! | cannot be placed at the front\n");
+            continue;
+        }
+
+        int i = 0;
+
+        while(input_cmd[i] != NULL){
+            i++;
+            input_cmd[i] = strtok(NULL," ");
+            if((strcmp(input_cmd[i],"|") ==0 && strcmp(input_cmd[i -1],"|") ==0)||strcmp(input_cmd[i],"||") ==0){
+                printf("3230shell: should not have two consecutive | without in-between command\n");
+                continue;
+            }
+            if(input_cmd[i]== NULL){
+                if(strcmp(input_cmd[i -1],"|") ==0){
+                    printf("Error! | cannot be placed at the back\n");
+                    continue;
+                }
+                break;
+            }
+        }
+
+        char *in_put[MAX] ={NULL,};
+
+        int j = 0;
+        while(j < i){
+            in_put[j] = input_cmd[j];
+            printf("%s\n",in_put[j]);
+            j++;
+        }
+        in_put[j] = input_cmd[i];
+
         /*
         strncpy(pipe_parse,shell_cmd,strlen(shell_cmd));
 
