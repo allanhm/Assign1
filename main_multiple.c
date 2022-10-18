@@ -1,5 +1,3 @@
-
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -8,6 +6,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <ctype.h>
+#include <signal.h>
 #define MAX 1024
 
 int rec = 0;
@@ -39,7 +38,7 @@ void sig_handler(int signum){
         rec = 1;
     }
     if(signum == SIGINT){
-        printf("Wrong");
+        printf("\n");
     }
 
 }
@@ -61,10 +60,16 @@ int main(void){
 
         struct sigaction sa;
         memset(&sa, 0, sizeof(sa));
-        //sigaction(SIGINT, NULL, &sa);
-        sa.sa_handler = sig_handler;
-        sigaction(SIGINT, &sa, NULL);
 
+        sigaction(SIGINT, NULL, &sa);
+        sigaction(SIGUSR1, NULL, &sa);
+
+        sa.sa_handler = sig_handler;
+
+
+
+        sigaction(SIGUSR1, &sa, NULL);
+        sigaction(SIGINT, &sa, NULL);
 
         inputs = shell_prompt(); // prompt display
 
@@ -125,7 +130,7 @@ int main(void){
             }
         }
 
-        signal(SIGUSR1,sig_handler);
+
 
         pid = fork();
         if (pid <0){
