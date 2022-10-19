@@ -64,8 +64,10 @@ int main(void){
     sigaction(SIGUSR1, &sa, NULL);
 
     while(1){
-        int status;
+        int status; // status checking by parent process
+
         int is_error = 0;
+
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
         char shell_cmd[MAX] ={0};
@@ -76,6 +78,7 @@ int main(void){
 
         char *inputs = shell_prompt(shell_cmd);
 
+
         if(strcmp(inputs,"NULL") == 0){
             if(reset == 1){
                 printf("\n");
@@ -84,6 +87,7 @@ int main(void){
             continue;
         }
 
+        // command parse
 
         input_cmd[0] = strtok(inputs," ");
 
@@ -116,13 +120,14 @@ int main(void){
 
         while(j < i){
             in_put[j] = input_cmd[j];
-            printf("%s\n\n\n\n\n",in_put[j]);
             if(strcmp(in_put[j],"|") == 0)
                 pipe_cnt++;
             j++;
         }
 
         in_put[j] = input_cmd[j];
+
+        int
 
 
         if (strcmp(in_put[0],"exit") == 0){
