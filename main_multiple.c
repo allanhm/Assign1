@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <signal.h>
 #define MAX 1024
+#define CMD_MAX 5
 
 int rec = 0, reset = 0;
 
@@ -67,12 +68,14 @@ int main(void){
         int status; // status checking by parent process
 
         int is_error = 0;
+        char pos[MAX] ={0};
 
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
         char shell_cmd[MAX] ={0};
 
-        int i = 0 , pipe_cnt =0;
+        int i = 0 , pipe_cnt =0, cmd_cnt = 0;
+
 
 
 
@@ -87,10 +90,95 @@ int main(void){
             continue;
         }
 
-        // command parse
+        // 1. command parse 한다.
 
         input_cmd[0] = strtok(inputs," ");
+        printf("%s\n",input_cmd[0]);
 
+        while(input_cmd[i] != NULL){
+            i++;
+            input_cmd[i] = strtok(NULL," ");
+            if(input_cmd[i] == NULL){
+                break;
+            }
+            printf("%s\n",input_cmd[i]);
+        }
+
+
+        // 2. pipe 오류를 확인한다.
+
+
+        if (strcmp(input_cmd[0],"|") == 0){
+            printf("3230shell: | cannot be placed at the front\n");
+            is_error = 1;
+        }
+
+        if(is_error == 0){
+            for( int j = 1; j< i; j++){
+                if((strcmp(input_cmd[j],"|") ==0 && strcmp(input_cmd[j -1],"|") ==0)||strcmp(input_cmd[j],"||") ==0){
+                    printf("3230shell: should not have two consecutive | without in-between command\n");
+                    is_error = 1;
+                    break;
+                }
+                if (j == i -1  && strcmp(input_cmd[j],"|") == 0 || j == i -1  && strcmp(input_cmd[j],"||") ==0){
+                    printf("3230shell:  | cannot be placed at the back\n");
+                    is_error = 1;
+                    break;
+                }
+        }
+        }
+
+        if (is_error == 1)
+            continue;
+
+
+        // 3. pipe 확인한 이후에 명령어를 별도로 뽑아낸다.
+
+        int j = 0;
+
+        while(j < i){
+            in_put[j] = input_cmd[j];
+            if(strcmp(in_put[j],"|") == 0)
+                pos[j] =1;
+                pipe_cnt++;
+            j++;
+        }
+
+        cmd_cnt = pipe_cnt + 1;
+
+        if (cmd_cnt > CMD_MAX){
+            printf("3230shell: Command cann be executed at most 5\n");
+            continue;
+        }
+
+        int pos =0;
+
+        for (int cmd_loop = 0; cmd_loop <= pipe_cnt; cmd_loop++){
+            char* ind_cmd[30] = {NULL,};
+            int index = 0;
+
+            while(strcmp(in_put[pos],"|") != 0 && in_put[pos] != NULL){
+                ind_cmd[index] = in_put[index];
+                printf("%s\n",ind_cmd[index]);
+
+            }
+
+        }
+
+
+
+
+
+
+
+
+
+        // 4. 돌린다.
+
+
+
+
+        /*
         if (strcmp(input_cmd[0],"|") == 0){
             printf("Error! | cannot be placed at the front\n");
             is_error = 1;
@@ -113,6 +201,7 @@ int main(void){
                 break;
             }
         }
+
         if (is_error == 1)
             continue;
 
@@ -201,9 +290,7 @@ int main(void){
 
         }
 
-
-
-
+       */
     }
     return 0;
 }
