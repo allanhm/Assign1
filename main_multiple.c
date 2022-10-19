@@ -70,7 +70,7 @@ int main(void){
         char *in_put[MAX] ={NULL,};
         char shell_cmd[MAX] ={0};
 
-        int i , pipe =0;
+        int i , pipe_cnt =0;
 
 
 
@@ -117,7 +117,7 @@ int main(void){
         while(j < i){
             in_put[j] = input_cmd[j];
             if(strcmp(in_put[j],"|") == 0)
-                pipe++;
+                pipe_cnt++;
             j++;
         }
 
@@ -137,9 +137,9 @@ int main(void){
         //pipe 하자~~~
 
 
-        for (int loop =0; loop <= pipe; loop++){ //since loop must have to run once.
+        for (int loop =0; loop <= pipe_cnt; loop++){ //since loop must have to run once.
 
-            if(pipe > 1){
+            if(pipe_cnt > 1){
                 pipe(pfd1);
                 pipe(pfd2);
             }
@@ -156,19 +156,19 @@ int main(void){
                 sigaction(SIGINT, &sa, NULL);
                 sigaction(SIGUSR1, &sa, NULL);
                 //
-                if(loop == 0 && pipe >1){ // first pipe
+                if(loop == 0 && pip_cnt >1){ // first pipe
                     close(pfd2[0]);
                     close(pfd2[1]);
                     close(pfd1[0]); //set pipe 1 write end to stdout
 
                 }
-                if(loop != pipe && pipe > 1){ // piping in between the commands.
+                if(loop != pipe_cnt && pipe_cnt > 1){ // piping in between the commands.
                     close(pfd1[1]); //close pipe1 write end
                     close(pfd2[0]); //close pipe2 read end
                     dup2(pfd1[0], 0); //set pipe1 read end to stdin
                     dup2(pfd2[1], 1); //set pipe2 write end to stdout
                 }
-                if(loop == pipe && pipe > 1){
+                if(loop == pipe_cnt && pipe_cnt > 1){
                     close(pfd1[0]); //close pipe1
                     close(pfd1[1]);
                     close(pfd2[1]); //close pipe2 write end
@@ -194,7 +194,6 @@ int main(void){
             }
 
         }
-        pid = fork();
 
 
 
