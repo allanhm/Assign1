@@ -50,9 +50,9 @@ void sig_handler1(int signum){
 
 int main(void){
     int status;
-    pid_t pid[5];
-    int pfd1[2];
-    int pfd2[2];
+    pid_t pid;
+    int fds[5][2];
+
 
     struct sigaction sa;
 
@@ -173,10 +173,14 @@ int main(void){
         // 명령어 받아오기
         int pos =0;
 
-        if(pipe_cnt > 1){
-            pipe(pfd1);
-            pipe(pfd2);
+
+
+
+        for(int i = 0;i < pipe_cnt;i++ ){ // if pipe_cnt = 4 --> only can use fds 0,1,2,3 -->fds[4]
+            pipe(fds[i]);
         }
+
+
 
         for (int cmd_loop = 0; cmd_loop < cmd_cnt; cmd_loop++) {
             printf("check\n\n\n\"");
@@ -193,13 +197,12 @@ int main(void){
             pos++;
             // command execution
 
+            pid = fork();
 
-            pid[cmd_loop] = fork();
-
-            if (pid[cmd_loop]  <0){
+            if (pid  <0){
                 printf("fork: error no %s\n", strerror(errno));
                 exit(-1);
-            } else if (pid[cmd_loop]  == 0) {
+            } else if (pid == 0) {
                 while(!rec);
 
                 //signal reset
@@ -207,44 +210,55 @@ int main(void){
                 sigaction(SIGINT, &sa, NULL);
                 sigaction(SIGUSR1, &sa, NULL);
                 //
-                if(cmd_loop == 0 && pipe_cnt >1){ // first pipe
-                    close(pfd2[0]);
-                    close(pfd2[1]);
-                    close(pfd1[0]); //set pipe 1 write end to stdout
-                    dup2(pfd1[1], 1);
+                if(cmd_loop == 0 && pipe_cnt >=1){ // first pipe e.g. if pipe total 4 and first count is like fds[3] fds[2] fds[1]
+                    for(int i = pipe_cnt - 1 ; i> cmd_loop;i--){
+                        close(fds[i][0]);
+                        close(fds[i][1]);
+                    }
+                    close(fds[cmd_loop][0]) // close stdin
+
+                    dup2(pfd1[cmd_loop][1], 1);//set pipe 1 write end to stdout
 
                 }
-                if( 0 < cmd_loop && cmd_loop < pipe_cnt && pipe_cnt > 1){ // piping in between the commands.
-                    close(pfd1[1]); //close pipe1 write end
-                    close(pfd2[0]); //close pipe2 read end
-                    dup2(pfd1[0], 0); //set pipe1 read end to stdin
-                    dup2(pfd2[1], 1); //set pipe2 write end to stdout
+                if( 0 < cmd_loop && cmd_loop < pipe_cnt && pipe_cnt >= 1){ // if current is 3rd commdand cmd_loop =2
+                    for(int i = pipe_cnt - 1  ; i> cmd_loop;i--){ // fds[3] closed
+                        close(fds[i][0]);
+                        close(fds[i][1]);
+                    }
+                    for(int i = 0 ; i < cmd_loop - 1 ;i++){ //fds[0]
+                        close(fds[i][0]);
+                        close(fds[i][1]);
+                    }
+                    // fds[1] fds[2] left
+                    close(fds[cmd_loop-1][1]);
+                    close(fds[cmd_loop][0]);
+                    dup2(fds[cmd_loop-1][0],0);
+                    dup2(fds[cmd_loop][1],1);
                 }
-                if(cmd_loop == pipe_cnt && pipe_cnt > 1){
-                    close(pfd1[0]); //close pipe1
-                    close(pfd1[1]);
-                    close(pfd2[1]); //close pipe2 write end
-                    dup2(pfd2[0], 0); //set pipe2 read end to stdin
-                }
+                if(cmd_loop == pipe_cnt && pipe_cnt >= 1){ // if 4th cmd loop 3
 
+                    for(int i = 0 ; i < cmd_loop -1;i++){
+                        close(fds[i][0]);
+                        close(fds[i][1]);
+                    }
+                    close(fds[cmd_loop][1],1);
+                    dup2(fds[cmd_loop[0],0]);
+                }
 
                 if(execvp(ind_cmd[0],ind_cmd) == -1){
                     printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
                     exit(-1);
                 }
             } else{
+                kill(pid , SIGUSR1);
                 sa.sa_handler = SIG_IGN;
                 sigaction(SIGINT, &sa, NULL);
-                kill(pid[cmd_loop] , SIGUSR1);
-                break;
+                if(cmd_loop < cmd_cnt){
+                    continue;
+                }
+                wait(&status);
             }
 
-        }
-        while ( cmd_cnt>0){
-            wait(&status);
-            sa.sa_handler = sig_handler1;
-            sigaction(SIGINT, &sa, NULL);
-            cmd_cnt--;
         }
 
 
