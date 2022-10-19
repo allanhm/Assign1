@@ -52,37 +52,31 @@ void sig_handler1(int signum){
 int main(void){
 
 
+    struct sigaction sa;
+
+
+
 
     while(1){
         pid_t pid;
         int is_error = 0;
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
-        //char *inputs;
+
         int i = 0, pipe = 0;
 
 
-
-
-
-        //memset(&sa, 0, sizeof(sa));
-        struct sigaction sa;
-        struct sigaction old;
-        sigaction(SIGINT, NULL, &old);
-        sigaction(SIGUSR1, NULL, &old);
+        sigaction(SIGINT, NULL, &sa);
+        sigaction(SIGUSR1, NULL, &sa);
 
 
         sa.sa_handler = sig_handler1;
 
-        sigaction(SIGUSR1, &sa, NULL);
         sigaction(SIGINT, &sa, NULL);
+        sigaction(SIGUSR1, &sa, NULL);
+
 
         char *inputs = shell_prompt(); // prompt display
-
-        //if (strcmp(inputs,"SIGINT")==0){
-        //    continue;
-       // }
-
 
 
         input_cmd[0] = strtok(inputs," ");
@@ -148,12 +142,15 @@ int main(void){
 
             while(!rec);
 
-            sa.sa_handler = SIG_DFL;
+            struct sigaction old;
 
-            sigaction(SIGUSR1, &sa, NULL);
-            sigaction(SIGINT, &sa, NULL);
+            old.sa_handler = SIG_DFL;
+            old.sa_flags = 0;
 
-            //sa.sa_handler = SIG_DFL;
+            sigaction(SIGINT, &old, NULL);
+            sigaction(SIGUSR1, &old, NULL);
+            printf("test\n\n");
+            //
 
             if(execvp(in_put[0],in_put) == -1){
                 printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
