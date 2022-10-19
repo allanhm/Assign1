@@ -68,7 +68,6 @@ int main(void){
         int status; // status checking by parent process
 
         int is_error = 0;
-        char pos[MAX] ={0};
 
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
@@ -101,7 +100,19 @@ int main(void){
             if(input_cmd[i] == NULL){
                 break;
             }
-            printf("%s\n",input_cmd[i]);
+            //printf("%s\n",input_cmd[i]);
+        }
+
+        //EXIT
+        if (strcmp(input_cmd[0],"exit") == 0){
+            if (i > 1){
+                printf("3230shell: \"exit\" with other arguments!!!!\n");
+                continue;
+            }
+            else{
+                printf("3230shell: Terminated\n");
+                exit(0);
+            }
         }
 
 
@@ -139,12 +150,13 @@ int main(void){
         while(j < i){
             in_put[j] = input_cmd[j];
             if(strcmp(in_put[j],"|") == 0)
-                pos[j] =1;
                 pipe_cnt++;
             j++;
         }
 
         cmd_cnt = pipe_cnt + 1;
+
+        printf("pipe num is %d\n",pipe_cnt);
 
         if (cmd_cnt > CMD_MAX){
             printf("3230shell: Command cann be executed at most 5\n");
@@ -153,17 +165,88 @@ int main(void){
 
         int pos =0;
 
-        for (int cmd_loop = 0; cmd_loop <= pipe_cnt; cmd_loop++){
-            char* ind_cmd[30] = {NULL,};
-            int index = 0;
 
-            while(strcmp(in_put[pos],"|") != 0 && in_put[pos] != NULL){
-                ind_cmd[index] = in_put[index];
-                printf("%s\n",ind_cmd[index]);
+        //printf("j is %d\n\n",j);
+
+
+        // 명령어 받아오기
+        for (int cmd_loop = 0; cmd_loop < cmd_cnt; cmd_loop++) {
+            char *ind_cmd[30] = {NULL,};
+            int index = 0;// command 선
+
+            while (pos < j && strcmp(in_put[pos], "|") != 0 ) {
+                ind_cmd[index] = in_put[pos];
+                printf("%s\n", ind_cmd[index]);
+                index++;
+                pos++;
 
             }
+            pos++;
+            // command execution
 
+            if(pipe_cnt > 1){
+                pipe(pfd1);
+                pipe(pfd2);
+            }
+            pid = fork();
+
+            if (pid <0){
+                printf("fork: error no %s\n", strerror(errno));
+                exit(-1);
+            } else if (pid == 0) {
+                while(!rec);
+
+                //signal reset
+                sa.sa_handler = SIG_DFL;
+                sigaction(SIGINT, &sa, NULL);
+                sigaction(SIGUSR1, &sa, NULL);
+                //
+                if(cmd_loop == 0 && pipe_cnt >1){ // first pipe
+                    close(pfd2[0]);
+                    close(pfd2[1]);
+                    close(pfd1[0]); //set pipe 1 write end to stdout
+
+                }
+                if( 0 < cmd_loop && cmd_loop < pipe_cnt && pipe_cnt > 1){ // piping in between the commands.
+                    close(pfd1[1]); //close pipe1 write end
+                    close(pfd2[0]); //close pipe2 read end
+                    dup2(pfd1[0], 0); //set pipe1 read end to stdin
+                    dup2(pfd2[1], 1); //set pipe2 write end to stdout
+                }
+                if(cmd_loop == pipe_cnt && pipe_cnt > 1){
+                    close(pfd1[0]); //close pipe1
+                    close(pfd1[1]);
+                    close(pfd2[1]); //close pipe2 write end
+                    dup2(pfd2[0], 0); //set pipe2 read end to stdin
+                }
+
+
+                if(execvp(ind_cmd[0],ind_cmd) == -1){
+                    printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
+                    exit(-1);
+                }
+            } else{
+                kill(pid, SIGUSR1);
+
+                sa.sa_handler = SIG_IGN;
+                sigaction(SIGINT, &sa, NULL);
+
+                wait(&status);
+
+                sa.sa_handler = sig_handler1;
+                sigaction(SIGINT, &sa, NULL);
+                continue;
+            }
         }
+
+
+
+        //for (int cmd_loop = 0; cmd_loop < cmd_cnt; cmd_loop++){
+
+
+
+
+
 
 
 
