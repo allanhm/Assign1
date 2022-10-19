@@ -21,11 +21,12 @@ char* shell_prompt(){
     static  char shell_cmd[MAX] ={0};
     printf("$$ 3230shell ##");
     fgets(shell_cmd,MAX,stdin);
+    /*
     if (reset == 1){
         reset = 0;
         printf("\n");
         return shell_prompt();
-    }
+    }*/
 
     if(strlen(shell_cmd) == 1){
         return shell_prompt();
@@ -50,10 +51,10 @@ void sig_handler1(int signum){
 
 
 int main(void){
-
+    int status;
     pid_t pid;
     while(1){
-
+        int status;
         int is_error = 0;
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
@@ -72,7 +73,14 @@ int main(void){
         sigaction(SIGUSR1, &sa, NULL);
 
 
-        char *inputs = shell_prompt(); // prompt display
+        printf("testing loop\n");
+        char *inputs = shell_prompt();
+
+        if(reset == 1){
+            printf("\n");
+            reset =0;
+            continue;
+        }
 
 
         input_cmd[0] = strtok(inputs," ");
@@ -137,12 +145,10 @@ int main(void){
         } else if (pid == 0) {
 
             while(!rec);
-
             sa.sa_handler = SIG_DFL;
 
             sigaction(SIGINT, &sa, NULL);
             sigaction(SIGUSR1, &sa, NULL);
-
 
             if(execvp(in_put[0],in_put) == -1){
                 printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
@@ -151,8 +157,9 @@ int main(void){
 
         } else{
             kill(pid, SIGUSR1);
-            int status;
-            waitpid(pid,&status,0);
+            signal(SIGINT,SIG_IGN);
+            wait(&status);
+            printf("should not move");
 
             continue;
         }
