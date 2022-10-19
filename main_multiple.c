@@ -50,6 +50,8 @@ void sig_handler1(int signum){
 int main(void){
     int status;
     pid_t pid;
+    int pfd1[2];
+    int pfd2[2];
 
     struct sigaction sa;
 
@@ -68,7 +70,7 @@ int main(void){
         char *in_put[MAX] ={NULL,};
         char shell_cmd[MAX] ={0};
 
-        int i = 0, pipe = 0;
+        int i , pipe =0;
 
 
 
