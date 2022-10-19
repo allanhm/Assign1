@@ -201,10 +201,11 @@ int main(void){
                 sigaction(SIGINT, &sa, NULL);
                 sigaction(SIGUSR1, &sa, NULL);
                 //
-                if(cmd_loop == 0 && pipe_cnt >1){ // first pipe
+                if(cmd_loop == 0 && pipe_cnt >1){ // firspipet
                     close(pfd2[0]);
                     close(pfd2[1]);
                     close(pfd1[0]); //set pipe 1 write end to stdout
+                    dup2(pfd1[1], 1);
 
                 }
                 if( 0 < cmd_loop && cmd_loop < pipe_cnt && pipe_cnt > 1){ // piping in between the commands.
@@ -235,7 +236,7 @@ int main(void){
 
                 sa.sa_handler = sig_handler1;
                 sigaction(SIGINT, &sa, NULL);
-                continue;
+                break;
             }
         }
 
