@@ -19,7 +19,7 @@ void terminate(){
 
 char* shell_prompt(){
     static  char shell_cmd[MAX] ={0};
-    printf("$$ 3230shell ## ");
+
     fgets(shell_cmd,MAX,stdin);
 
     if(strlen(shell_cmd) == 1){
@@ -37,6 +37,7 @@ void sig_handler1(int signum){
         rec = 1;
     }
     if(signum == SIGINT){
+        printf("testing\n");
         reset = 1;
     }
 
@@ -69,17 +70,15 @@ int main(void){
 
 
 
-        printf("does this pass here?\n");
-
-
+        //printf("does this pass here?\n");
+        sleep(2);
+        printf("$$ 3230shell ## ");
         char *inputs = shell_prompt();
 
         if(reset == 1){
             printf("\n");
-
-
             reset =0;
-            printf("reset value is %d\n",reset);
+            //printf("reset value is %d\n",reset);
             continue;
         }
 
@@ -157,14 +156,12 @@ int main(void){
             kill(pid, SIGUSR1);
 
             sa.sa_handler = SIG_IGN;
-
             sigaction(SIGINT, &sa, NULL);
+
             wait(&status);
 
             sa.sa_handler = sig_handler1;
-
             sigaction(SIGINT, &sa, NULL);
-
             continue;
         }
 
