@@ -19,14 +19,8 @@ void terminate(){
 
 char* shell_prompt(){
     static  char shell_cmd[MAX] ={0};
-    printf("$$ 3230shell ##");
+    printf("$$ 3230shell ## ");
     fgets(shell_cmd,MAX,stdin);
-    /*
-    if (reset == 1){
-        reset = 0;
-        printf("\n");
-        return shell_prompt();
-    }*/
 
     if(strlen(shell_cmd) == 1){
         return shell_prompt();
@@ -53,6 +47,7 @@ void sig_handler1(int signum){
 int main(void){
     int status;
     pid_t pid;
+
     while(1){
         int status;
         int is_error = 0;
@@ -73,12 +68,12 @@ int main(void){
         sigaction(SIGUSR1, &sa, NULL);
 
 
-        printf("testing loop\n");
         char *inputs = shell_prompt();
 
         if(reset == 1){
             printf("\n");
             reset =0;
+
             continue;
         }
 
@@ -159,7 +154,7 @@ int main(void){
             kill(pid, SIGUSR1);
             signal(SIGINT,SIG_IGN);
             wait(&status);
-            printf("should not move");
+            signal(SIGINT,SIG_DFL);
 
             continue;
         }
