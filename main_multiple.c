@@ -36,7 +36,7 @@ char* shell_prompt(){
     }
 }
 
-void sig_handler(int signum){
+void sig_handler1(int signum){
 
     if(signum == SIGUSR1){
         rec = 1;
@@ -48,7 +48,11 @@ void sig_handler(int signum){
 }
 
 
+
 int main(void){
+
+
+
     while(1){
         pid_t pid;
         int is_error = 0;
@@ -58,13 +62,17 @@ int main(void){
         int i = 0, pipe = 0;
 
 
+
+
+
+        //memset(&sa, 0, sizeof(sa));
         struct sigaction sa;
-        memset(&sa, 0, sizeof(sa));
+        struct sigaction old;
+        sigaction(SIGINT, NULL, &old);
+        sigaction(SIGUSR1, NULL, &old);
 
-        sigaction(SIGINT, NULL, &sa);
-        sigaction(SIGUSR1, NULL, &sa);
 
-        sa.sa_handler = sig_handler;
+        sa.sa_handler = sig_handler1;;
 
         sigaction(SIGUSR1, &sa, NULL);
         sigaction(SIGINT, &sa, NULL);
@@ -137,21 +145,15 @@ int main(void){
             printf("fork: error no ");
             exit(-1);
         } else if (pid == 0) {
+
             while(!rec);
-            struct sigaction new;
-            memset(&new, 0, sizeof(new));
 
-            sigaction(SIGINT, &sa, &new);
-            sigaction(SIGUSR1, &sa, &new);
+            sa.sa_handler = SIG_DFL;
 
-            sa.sa_handler = sig_handler;
-
-            sigaction(SIGUSR1, &new, &sa);
-            sigaction(SIGINT, &new, &sa);
-
+            sigaction(SIGUSR1, &sa, NULL);
+            sigaction(SIGINT, &sa, NULL);
 
             //sa.sa_handler = SIG_DFL;
-            //reset= 0;
 
             if(execvp(in_put[0],in_put) == -1){
                 printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
