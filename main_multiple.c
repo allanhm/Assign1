@@ -72,8 +72,6 @@ int main(void){
 
 
 
-        //char *inputs = shell_prompt();
-        //printf("does this pass here?\n");
         char *inputs = shell_prompt(shell_cmd);
 
         if(strcmp(inputs,"NULL") == 0){
@@ -81,9 +79,6 @@ int main(void){
                 printf("\n");
                 reset = 0;
             }
-
-
-            //printf("reset value is %d\n",reset);
             continue;
         }
 
@@ -137,38 +132,68 @@ int main(void){
                 exit(0);
             }
         }
+        //pipe 하자~~~
 
 
+        for (int loop =0; loop <= pipe; loop++){ //since loop must have to run once.
 
-        pid = fork();
-        if (pid <0){
-            printf("fork: error no ");
-            exit(-1);
-        } else if (pid == 0) {
+            if(pipe > 1){
+                pipe(pfd1);
+                pipe(pfd2);
+            }
+            pid = fork();
 
-            while(!rec);
-            sa.sa_handler = SIG_DFL;
-
-            sigaction(SIGINT, &sa, NULL);
-            sigaction(SIGUSR1, &sa, NULL);
-
-            if(execvp(in_put[0],in_put) == -1){
-                printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
+            if (pid <0){
+                printf("fork: error no %s\n", strerror(errno));
                 exit(-1);
+            } else if (pid == 0) {
+                while(!rec);
+
+                //signal reset
+                sa.sa_handler = SIG_DFL;
+                sigaction(SIGINT, &sa, NULL);
+                sigaction(SIGUSR1, &sa, NULL);
+                //
+                if(loop == 0 && pipe >1){ // first pipe
+                    close(pfd2[0]);
+                    close(pfd2[1]);
+                    close(pfd1[0]); //set pipe 1 write end to stdout
+
+                }
+                if(loop != pipe && pipe > 1){ // piping in between the commands.
+                    close(pfd1[1]); //close pipe1 write end
+                    close(pfd2[0]); //close pipe2 read end
+                    dup2(pfd1[0], 0); //set pipe1 read end to stdin
+                    dup2(pfd2[1], 1); //set pipe2 write end to stdout
+                }
+                if(loop == pipe && pipe > 1){
+                    close(pfd1[0]); //close pipe1
+                    close(pfd1[1]);
+                    close(pfd2[1]); //close pipe2 write end
+                    dup2(pfd2[0], 0); //set pipe2 read end to stdin
+                }
+
+
+                if(execvp(in_put[0],in_put) == -1){
+                    printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
+                    exit(-1);
+                }
+            } else{
+                kill(pid, SIGUSR1);
+
+                sa.sa_handler = SIG_IGN;
+                sigaction(SIGINT, &sa, NULL);
+
+                wait(&status);
+
+                sa.sa_handler = sig_handler1;
+                sigaction(SIGINT, &sa, NULL);
+                continue;
             }
 
-        } else{
-            kill(pid, SIGUSR1);
-
-            sa.sa_handler = SIG_IGN;
-            sigaction(SIGINT, &sa, NULL);
-
-            wait(&status);
-
-            sa.sa_handler = sig_handler1;
-            sigaction(SIGINT, &sa, NULL);
-            continue;
         }
+        pid = fork();
+
 
 
 
