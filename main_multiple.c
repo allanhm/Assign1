@@ -69,10 +69,10 @@ int main(void){
 
 
 
-
+        printf("$$ 3230shell ## ");
         //printf("does this pass here?\n");
         sleep(2);
-        printf("$$ 3230shell ## ");
+
         char *inputs = shell_prompt();
 
         if(reset == 1){
