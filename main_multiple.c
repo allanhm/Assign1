@@ -70,7 +70,7 @@ int main(void){
         char *in_put[MAX] ={NULL,};
         char shell_cmd[MAX] ={0};
 
-        int i , pipe_cnt =0;
+        int i = 0 , pipe_cnt =0;
 
 
 
@@ -116,6 +116,7 @@ int main(void){
 
         while(j < i){
             in_put[j] = input_cmd[j];
+            printf("%s\n\n\n\n\n",in_put[j]);
             if(strcmp(in_put[j],"|") == 0)
                 pipe_cnt++;
             j++;
@@ -156,7 +157,7 @@ int main(void){
                 sigaction(SIGINT, &sa, NULL);
                 sigaction(SIGUSR1, &sa, NULL);
                 //
-                if(loop == 0 && pip_cnt >1){ // first pipe
+                if(loop == 0 && pipe_cnt >1){ // first pipe
                     close(pfd2[0]);
                     close(pfd2[1]);
                     close(pfd1[0]); //set pipe 1 write end to stdout
