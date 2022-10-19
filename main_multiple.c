@@ -157,20 +157,29 @@ int main(void){
         cmd_cnt = pipe_cnt + 1;
 
         printf("pipe num is %d\n",pipe_cnt);
+        printf("command num is %d\n",cmd_cnt);
 
         if (cmd_cnt > CMD_MAX){
             printf("3230shell: Command cann be executed at most 5\n");
             continue;
         }
 
-        int pos =0;
+
 
 
         //printf("j is %d\n\n",j);
 
 
         // 명령어 받아오기
+        int pos =0;
+
+        if(pipe_cnt > 1){
+            pipe(pfd1);
+            pipe(pfd2);
+        }
+
         for (int cmd_loop = 0; cmd_loop < cmd_cnt; cmd_loop++) {
+            printf("check\n\n\n\"");
             char *ind_cmd[30] = {NULL,};
             int index = 0;// command 선
 
@@ -184,10 +193,7 @@ int main(void){
             pos++;
             // command execution
 
-            if(pipe_cnt > 1){
-                pipe(pfd1);
-                pipe(pfd2);
-            }
+
             pid = fork();
 
             if (pid <0){
@@ -201,7 +207,7 @@ int main(void){
                 sigaction(SIGINT, &sa, NULL);
                 sigaction(SIGUSR1, &sa, NULL);
                 //
-                if(cmd_loop == 0 && pipe_cnt >1){ // firspipet
+                if(cmd_loop == 0 && pipe_cnt >1){ // first pipe
                     close(pfd2[0]);
                     close(pfd2[1]);
                     close(pfd1[0]); //set pipe 1 write end to stdout
@@ -233,7 +239,6 @@ int main(void){
                 sigaction(SIGINT, &sa, NULL);
 
                 wait(&status);
-
                 sa.sa_handler = sig_handler1;
                 sigaction(SIGINT, &sa, NULL);
                 break;
