@@ -51,20 +51,16 @@ void sig_handler1(int signum){
 
 int main(void){
 
-
-    struct sigaction sa;
-
-
-
-
+    pid_t pid;
     while(1){
-        pid_t pid;
+
         int is_error = 0;
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
 
         int i = 0, pipe = 0;
 
+        struct sigaction sa;
 
         sigaction(SIGINT, NULL, &sa);
         sigaction(SIGUSR1, NULL, &sa);
@@ -142,15 +138,11 @@ int main(void){
 
             while(!rec);
 
-            struct sigaction old;
+            sa.sa_handler = SIG_DFL;
 
-            old.sa_handler = SIG_DFL;
-            old.sa_flags = 0;
+            sigaction(SIGINT, &sa, NULL);
+            sigaction(SIGUSR1, &sa, NULL);
 
-            sigaction(SIGINT, &old, NULL);
-            sigaction(SIGUSR1, &old, NULL);
-            printf("test\n\n");
-            //
 
             if(execvp(in_put[0],in_put) == -1){
                 printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
@@ -159,7 +151,9 @@ int main(void){
 
         } else{
             kill(pid, SIGUSR1);
-            waitpid(pid,NULL,0);
+            int status;
+            waitpid(pid,&status,0);
+
             continue;
         }
 
