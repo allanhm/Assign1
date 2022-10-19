@@ -48,6 +48,16 @@ int main(void){
     int status;
     pid_t pid;
 
+    struct sigaction sa;
+
+    sigaction(SIGINT, NULL, &sa);
+    sigaction(SIGUSR1, NULL, &sa);
+
+    sa.sa_handler = sig_handler1;
+
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGUSR1, &sa, NULL);
+
     while(1){
         int status;
         int is_error = 0;
@@ -56,24 +66,20 @@ int main(void){
 
         int i = 0, pipe = 0;
 
-        struct sigaction sa;
-
-        sigaction(SIGINT, NULL, &sa);
-        sigaction(SIGUSR1, NULL, &sa);
 
 
-        sa.sa_handler = sig_handler1;
 
-        sigaction(SIGINT, &sa, NULL);
-        sigaction(SIGUSR1, &sa, NULL);
+        printf("does this pass here?\n");
 
 
         char *inputs = shell_prompt();
 
         if(reset == 1){
             printf("\n");
-            reset =0;
 
+
+            reset =0;
+            printf("reset value is %d\n",reset);
             continue;
         }
 
@@ -104,9 +110,6 @@ int main(void){
         }
         if (is_error == 1)
             continue;
-
-
-
 
         int j = 0;
 
@@ -152,9 +155,15 @@ int main(void){
 
         } else{
             kill(pid, SIGUSR1);
-            signal(SIGINT,SIG_IGN);
+
+            sa.sa_handler = SIG_IGN;
+
+            sigaction(SIGINT, &sa, NULL);
             wait(&status);
-            signal(SIGINT,SIG_DFL);
+
+            sa.sa_handler = sig_handler1;
+
+            sigaction(SIGINT, &sa, NULL);
 
             continue;
         }
@@ -162,6 +171,7 @@ int main(void){
 
 
     }
+    return 0;
 }
 
 
