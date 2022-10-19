@@ -50,7 +50,7 @@ void sig_handler1(int signum){
 
 int main(void){
     int status;
-    pid_t pid;
+    pid_t pid[5];
     int pfd1[2];
     int pfd2[2];
 
@@ -194,12 +194,12 @@ int main(void){
             // command execution
 
 
-            pid = fork();
+            pid[cmd_loop] = fork();
 
-            if (pid <0){
+            if (pid[cmd_loop]  <0){
                 printf("fork: error no %s\n", strerror(errno));
                 exit(-1);
-            } else if (pid == 0) {
+            } else if (pid[cmd_loop]  == 0) {
                 while(!rec);
 
                 //signal reset
@@ -233,16 +233,18 @@ int main(void){
                     exit(-1);
                 }
             } else{
-                kill(pid, SIGUSR1);
-
                 sa.sa_handler = SIG_IGN;
                 sigaction(SIGINT, &sa, NULL);
-
-                wait(&status);
-                sa.sa_handler = sig_handler1;
-                sigaction(SIGINT, &sa, NULL);
+                kill(pid[cmd_loop] , SIGUSR1);
                 break;
             }
+
+        }
+        while ( cmd_cnt>0){
+            wait(&status);
+            sa.sa_handler = sig_handler1;
+            sigaction(SIGINT, &sa, NULL);
+            cmd_cnt--;
         }
 
 
