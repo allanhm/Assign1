@@ -17,17 +17,20 @@ void terminate(){
     exit(0);
 }
 
-char* shell_prompt(){
-    static  char shell_cmd[MAX] ={0};
+char * shell_prompt(char cmd[]){
 
-    fgets(shell_cmd,MAX,stdin);
 
-    if(strlen(shell_cmd) == 1){
-        return shell_prompt();
+    printf("$$ 3230shell ## ");
+    fgets(cmd,MAX,stdin);
+
+    //printf("shell_cmd[MAX]is %s and length is %lu",cmd,strlen(cmd));
+    if(strlen(cmd) == 1 || reset ==1){
+        cmd = "NULL";
+        return cmd;
     }
     else{
-        shell_cmd[strlen(shell_cmd)-1] = 0;
-        return shell_cmd;
+        cmd[strlen(cmd)-1] = 0;
+        return cmd;
     }
 }
 
@@ -37,7 +40,6 @@ void sig_handler1(int signum){
         rec = 1;
     }
     if(signum == SIGINT){
-        printf("testing\n");
         reset = 1;
     }
 
@@ -64,20 +66,23 @@ int main(void){
         int is_error = 0;
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
+        char shell_cmd[MAX] ={0};
 
         int i = 0, pipe = 0;
 
 
 
-        printf("$$ 3230shell ## ");
+        //char *inputs = shell_prompt();
         //printf("does this pass here?\n");
-        sleep(2);
+        char *inputs = shell_prompt(shell_cmd);
 
-        char *inputs = shell_prompt();
+        if(strcmp(inputs,"NULL") == 0){
+            if(reset == 1){
+                printf("\n");
+                reset = 0;
+            }
 
-        if(reset == 1){
-            printf("\n");
-            reset =0;
+
             //printf("reset value is %d\n",reset);
             continue;
         }
