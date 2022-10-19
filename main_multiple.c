@@ -72,7 +72,7 @@ int main(void){
         sigaction(SIGUSR1, NULL, &old);
 
 
-        sa.sa_handler = sig_handler1;;
+        sa.sa_handler = sig_handler1;
 
         sigaction(SIGUSR1, &sa, NULL);
         sigaction(SIGINT, &sa, NULL);
