@@ -255,32 +255,34 @@ int main(void){
             } else{ // when process is a parent process
 
                 kill(pid , SIGUSR1);
-
+                printf("pid is %d\n",pid);
                 sa.sa_handler = SIG_IGN;
                 sigaction(SIGINT, &sa, NULL);
                 if(cmd_loop + 1 < cmd_cnt){
                     continue;
                 }
-                //wait(&status);
+
                 for(int i = 0 ; i < pipe_cnt ;i++) { //close pipes for the parent
 
                     close(fds[i][0]);
                     close(fds[i][1]);
                 }
+                while (wpid=wait(&status)> 0);
 
                 }
-
+            /*
             while (wpid=wait(&status)>0){
-                getrusage(RUSAGE_CHILDREN,&timeX);
-                printf("(PID)%d   (CMD)%s", wpid,ind_cmd[0]);
-                printf("(user)%ld.%06ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec);
-                printf("(sys)%ld.%06ld s\n",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec);
+                printf("pid is %d\n", pid);
+                getrusage(RUSAGE_SELF,&timeX);
+                //printf("(PID)%d   (CMD)%s", wpid,ind_cmd[0]);
+                //printf("(user)%ld.%06ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec);
+                //printf("(sys)%ld.%06ld s\n",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec);
             };
             for(int i = 0 ; i < pipe_cnt ;i++) { //close pipes for the parent
 
                 close(fds[i][0]);
                 close(fds[i][1]);
-            }
+            }*/
 
             }
 
