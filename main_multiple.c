@@ -77,7 +77,7 @@ int main(void){
         char *in_put[MAX] ={NULL,};
         char shell_cmd[MAX] ={0};
 
-        int i = 0 , pipe_cnt =0;
+        int iter = 0 , pipe_cnt =0;
 
 
         char *inputs = shell_prompt(shell_cmd);
@@ -95,10 +95,10 @@ int main(void){
 
         input_cmd[0] = strtok(inputs," ");
 
-        while(input_cmd[i] != NULL){
-            i++;
-            input_cmd[i] = strtok(NULL," ");
-            if(input_cmd[i] == NULL){
+        while(input_cmd[iter] != NULL){
+            iter++;
+            input_cmd[iter] = strtok(NULL," ");
+            if(input_cmd[iter] == NULL){
                 break;
             }
             //printf("%s\n",input_cmd[i]);
@@ -106,7 +106,7 @@ int main(void){
 
         //EXIT
         if (strcmp(input_cmd[0],"exit") == 0){
-            if (i > 1){
+            if (iter > 1){
                 printf("3230shell: \"exit\" with other arguments!!!!\n");
                 continue;
             }
@@ -117,7 +117,7 @@ int main(void){
         }
 
         if (strcmp(input_cmd[0],"timeX") == 0){
-            if (i == 1){
+            if (iter == 1){
                 printf("3230shell: \"timeX\" cannot be a standalone command\n");
                 continue;
             }
@@ -136,13 +136,13 @@ int main(void){
         }
 
         if(is_error == 0){
-            for( int j = 1; j< i; j++){
+            for( int j = 1; j< iter; j++){
                 if((strcmp(input_cmd[j],"|") ==0 && strcmp(input_cmd[j -1],"|") ==0)||strcmp(input_cmd[j],"||") ==0){
                     printf("3230shell: should not have two consecutive | without in-between command\n");
                     is_error = 1;
                     break;
                 }
-                if (j == i -1  && strcmp(input_cmd[j],"|") == 0 || j == i -1  && strcmp(input_cmd[j],"||") ==0){
+                if (j == iter -1  && strcmp(input_cmd[j],"|") == 0 || j == iter -1  && strcmp(input_cmd[j],"||") ==0){
                     printf("3230shell:  | cannot be placed at the back\n");
                     is_error = 1;
                     break;
@@ -153,20 +153,21 @@ int main(void){
         if (is_error == 1)
             continue;
 
-
         // 3. pipe 확인한 이후에 명령어를 별도로 뽑아낸다.
 
         int input_idx = 0;
         if(is_timeX == 1){
-            input_idx = 1;
+            ptintf("input_cmd[0] is %s",input_cmd[input_idx]);
+            exit(0);
+        }else{
+            while(input_idx < iter){
+                in_put[input_idx] = input_cmd[input_idx];
+                if(strcmp(in_put[input_idx],"|") == 0)
+                    pipe_cnt++;
+                input_idx++;
+            }
         }
 
-        while(input_idx < i){
-            in_put[input_idx] = input_cmd[input_idx];
-            if(strcmp(in_put[input_idx],"|") == 0)
-                pipe_cnt++;
-            input_idx++;
-        }
 
 
         int cmd_cnt = pipe_cnt + 1;
