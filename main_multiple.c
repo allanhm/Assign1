@@ -269,24 +269,16 @@ int main(void){
                 }
                 while (wpid = wait(&status) > 0) {
                     getrusage(RUSAGE_CHILDREN, &timeX[time_index]);
-                    printf("pid is %d\n", pid);
                     time_cmd[time_index]= ind_cmd[0];
                     time_pid[time_index] = pid;
                     time_index ++;
-                    /*
-
-                    time_index++;
-                    printf("time index is %d", time_index);
-                     */
-
                 }
             }/*
+ *
             while (wpid=wait(&status)>0){
                 printf("pid is %d\n", pid);
                 getrusage(RUSAGE_SELF,&timeX);
-                //printf("(PID)%d   (CMD)%s", wpid,ind_cmd[0]);
-                //printf("(user)%ld.%06ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec);
-                //printf("(sys)%ld.%06ld s\n",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec);
+
             };
             for(int i = 0 ; i < pipe_cnt ;i++) { //close pipes for the parent
 
@@ -295,6 +287,11 @@ int main(void){
             }*/
 
             }
+        for (int i = 0; i< time_index; i++){
+            printf("(PID)%d   (CMD)%s", time_pid[i],time_cmd[i]);
+            printf("(user)%ld.%06ld s", timeX[i].ru_utime.tv_sec,timeX[i].ru_utime.tv_usec);
+            printf("(sys)%ld.%06ld s\n",timeX[i].ru_stime.tv_sec, timeX[i].ru_stime.tv_usec);
+        }
         /*
         printf("(PID)%d   (CMD)%s   ", pid,ind_cmd[0]);
         printf("(user)%ld.%06ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec);
