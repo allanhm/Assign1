@@ -272,9 +272,9 @@ int main(void){
 
             while (wpid=wait(&status)>0){
                 getrusage(RUSAGE_CHILDREN,&timeX);
-                printf("(PID)%d   (CMD)%s", pid,in_put[0]);
+                printf("(PID)%d   (CMD)%s", wpid,ind_cmd[0]);
                 printf("(user)%ld.%06ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec);
-                printf("(sys)%ld.%06ld s",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec);
+                printf("(sys)%ld.%06ld s\n",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec);
             };
             for(int i = 0 ; i < pipe_cnt ;i++) { //close pipes for the parent
 
