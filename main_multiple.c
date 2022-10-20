@@ -7,6 +7,8 @@
 #include <errno.h>
 #include <ctype.h>
 #include <signal.h>
+#include <sys/resource.h>
+
 #define MAX 1024
 #define CMD_MAX 5
 
@@ -51,6 +53,7 @@ void sig_handler1(int signum){
 
 int main(void){
     int status;
+
     //pid_t pid;
 
 
@@ -66,6 +69,7 @@ int main(void){
 
     while(1){
         //int status; // status checking by parent process
+        struct rusage timeX;
         pid_t pid, wpid;
         int is_error = 0;
         char *input_cmd[MAX] = {NULL,};
@@ -265,7 +269,13 @@ int main(void){
                 }
 
                 }
-            while (wpid=wait(&status)>0);
+
+            while (wpid=wait(&status)>0){
+                getrusage(RUSAGE_CHILDREN,&timeX);
+                printf("(PID)%d   (CMD)%s", pid,in_put[0]);
+                printf("(user)%ld.%06ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec);
+                printf("(sys)%ld.%06ld s",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec);
+            };
             for(int i = 0 ; i < pipe_cnt ;i++) { //close pipes for the parent
 
                 close(fds[i][0]);
@@ -278,8 +288,6 @@ int main(void){
 
 
     }
-
-
     return 0;
 }
 
