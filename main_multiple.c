@@ -116,7 +116,7 @@ int main(void){
             }
         }
 
-        if (strcmp(input_cmd[0],"time X") == 0){
+        if (strcmp(input_cmd[0],"timeX") == 0){
             if (i == 1){
                 printf("3230shell: \"timeX\" cannot be a standalone command\n");
                 continue;
@@ -301,12 +301,6 @@ int main(void){
             }
 
         }
-        /*
-        printf("(PID)%d   (CMD)%s   ", pid,ind_cmd[0]);
-        printf("(user)%ld.%06ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec);
-        printf("(sys)%ld.%06ld s\n",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec);
-        */
-
 
     }
     return 0;
