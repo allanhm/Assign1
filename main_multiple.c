@@ -154,10 +154,11 @@ int main(void){
             j++;
         }
 
+
         cmd_cnt = pipe_cnt + 1;
 
-        printf("pipe num is %d\n",pipe_cnt);
-        printf("command num is %d\n",cmd_cnt);
+        //printf("pipe num is %d\n",pipe_cnt);
+        //printf("command num is %d\n",cmd_cnt);
 
         if (cmd_cnt > CMD_MAX){
             printf("3230shell: Command cann be executed at most 5\n");
@@ -167,39 +168,41 @@ int main(void){
 
 
 
-        //printf("j is %d\n\n",j);
+        printf("j is %d\n\n",j);
 
 
         // 명령어 받아오기
-        int pos =0;
 
 
 
 
-        for(int i = 0;i < pipe_cnt;i++ ){ // if pipe_cnt = 4 --> only can use fds 0,1,2,3 -->fds[4]
-            pipe(fds[i]);
+
+        for(int init = 0;init < pipe_cnt;init++ ){ // if pipe_cnt = 4 --> only can use fds 0,1,2,3 -->fds[4]
+            pipe(fds[init]);
+            printf("%d\n",init);
         }
 
 
         int pipe_index = 0;
-        for (int cmd_loop = 1; cmd_loop <= cmd_cnt; cmd_loop++) {
-            printf("check\n\n\n\"");
+        int pos =0;
+
+        for (int cmd_loop = 0; cmd_loop < cmd_cnt; cmd_loop++) {  // condition 1) when command is 1 (O) 2) when command is 2 3) when command is more than 2
             char *ind_cmd[30] = {NULL,};
-            int index = 0;// command 선
+            int index = 0;
 
             while (pos < j && strcmp(in_put[pos], "|") != 0 ) {
+                printf("pos is %s\n",in_put[pos]);
                 ind_cmd[index] = in_put[pos];
-                printf("%s\n", ind_cmd[index]);
+                printf(" ind_cmd is %s\n", ind_cmd[index]);
                 index++;
                 pos++;
-
             }
 
             pos++;
             printf("Command Cycle \n");
             // command execution
 
-            /*
+
             pid = fork();
 
             if (pid  <0){
@@ -213,34 +216,35 @@ int main(void){
                 sigaction(SIGINT, &sa, NULL);
                 sigaction(SIGUSR1, &sa, NULL);
                 //
-                if(cmd_loop == 1 && pipe_cnt >=1){ // first pipe e.g. if pipe total 4 and first count is like fds[3] fds[2] fds[1]
-                    for(int i = pipe_cnt - 1 ; i> cmd_loop-1;i--){
+
+                if(cmd_loop == 0 && pipe_cnt >=1){ // first pipe e.g. if pipe total 4 and first count is like fds[3] fds[2] fds[1]
+                    for(int i = pipe_cnt - 1 ; i> cmd_loop;i--){ // when commands are 2 -> fds[0] is made
                         close(fds[i][0]);
                         close(fds[i][1]);
                     }
-                    close(fds[cmd_loop-1][0]); // close stdin
+                    close(fds[cmd_loop][0]); // close stdin
 
-                    dup2(fds[cmd_loop-1][1], 1);//set pipe 1 write end to stdout
+                    dup2(fds[cmd_loop][1], 1);//set pipe 1 write end to stdout
 
                 }
-                if( 1 < cmd_loop && cmd_loop < pipe_cnt  && pipe_cnt >= 1){ // if current is 3rd commdand cmd_loop =2
-                    for(int i = pipe_cnt - 1  ; i> cmd_loop -1;i--){ // fds[3] closed
-                        close(fds[i][0]);
-                        close(fds[i][1]);
+                if( 0 < cmd_loop && cmd_loop < pipe_cnt  && pipe_cnt >= 1){ // if current is 3rd commdand cmd_loop =2
+                    for(int i = pipe_cnt - 1  ; i> cmd_loop;i--){ // when commands are 5 and we are concerning 3rd cmd cmd_loop is 2 and pipe is 4
+                        close(fds[i][0]);                         // then close fds[0] and fds[3]
+                        close(fds[i][1]);                         // fds[3] is closed
                     }
-                    for(int i = 0 ; i < cmd_loop - 2 ;i++){ //fds[0]
+                    for(int i = 0 ; i < cmd_loop - 1 ;i++){ //fds[0]
                         close(fds[i][0]);
                         close(fds[i][1]);
                     }
                     // fds[1] fds[2] left
-                    close(fds[cmd_loop-2][1]);
-                    close(fds[cmd_loop-1][0]);
-                    dup2(fds[cmd_loop-2][0],0);
-                    dup2(fds[cmd_loop-1][1],1);
+                    close(fds[cmd_loop-1][1]); // fds[1]
+                    close(fds[cmd_loop][0]);
+                    dup2(fds[cmd_loop-1][0],0);
+                    dup2(fds[cmd_loop-0][1],1);
                 }
-                if(cmd_loop == pipe_cnt && pipe_cnt >= 1){ // if 4th cmd loop 3
+                if(cmd_loop == pipe_cnt && pipe_cnt >= 1){ // when commands are 5 and we are concerning 3rd cmd cmd_loop is 2 and pipe is 4
 
-                    for(int i = 0 ; i < cmd_loop -2;i++){
+                    for(int i = 0 ; i < cmd_loop -1;i++){           // consider last command 5th then cmd_loop is 4
                         close(fds[i][0]);
                         close(fds[i][1]);
                     }
@@ -256,15 +260,16 @@ int main(void){
                 kill(pid , SIGUSR1);
                 sa.sa_handler = SIG_IGN;
                 sigaction(SIGINT, &sa, NULL);
-                if(cmd_loop <= cmd_cnt){
+                if(cmd_loop + 1 < cmd_cnt){
                     continue;
                 }
                 wait(&status);
-                */
+
             }
 
 
         }
+
 
 
 
@@ -286,62 +291,7 @@ int main(void){
         // 4. 돌린다.
 
 
-
-
         /*
-        if (strcmp(input_cmd[0],"|") == 0){
-            printf("Error! | cannot be placed at the front\n");
-            is_error = 1;
-        }
-
-        while(input_cmd[i] != NULL && is_error == 0){
-            i++;
-            input_cmd[i] = strtok(NULL," ");
-
-            if(input_cmd[i]== NULL){
-                if(strcmp(input_cmd[i -1],"|") ==0){
-                    printf("Error! | cannot be placed at the back\n");
-                    is_error = 1;
-                }
-                break;
-            }
-            if((strcmp(input_cmd[i],"|") ==0 && strcmp(input_cmd[i -1],"|") ==0)||strcmp(input_cmd[i],"||") ==0){
-                printf("3230shell: should not have two consecutive | without in-between command\n");
-                is_error = 1;
-                break;
-            }
-        }
-
-        if (is_error == 1)
-            continue;
-
-        int j = 0;
-
-        while(j < i){
-            in_put[j] = input_cmd[j];
-            if(strcmp(in_put[j],"|") == 0)
-                pipe_cnt++;
-            j++;
-        }
-
-        in_put[j] = input_cmd[j];
-
-        int
-
-
-        if (strcmp(in_put[0],"exit") == 0){
-            if (i > 1){
-                printf("3230shell: \"exit\" with other arguments!!!!\n");
-                continue;
-            }
-            else{
-                printf("3230shell: Terminated\n");
-                exit(0);
-            }
-        }
-        //pipe 하자~~~
-
-
         for (int loop =0; loop <= pipe_cnt; loop++){ //since loop must have to run once.
 
             if(pipe_cnt > 1){
@@ -397,13 +347,13 @@ int main(void){
                 sigaction(SIGINT, &sa, NULL);
                 continue;
             }
-
+        */
         }
 
-       */
-    }
     return 0;
-}
+    }
+
+
 
 
 
