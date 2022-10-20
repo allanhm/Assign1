@@ -159,7 +159,8 @@ int main(void){
 
         // TIME_INDEX
         struct rusage timeX[cmd_cnt];
-        char time_tmp[cmd_cnt][2] ={0};
+        int time_pid[5] ={0};
+        char *time_cmd[5];
         int time_index = 0;
 
 
@@ -191,6 +192,7 @@ int main(void){
                 index++;
                 pos++;
             }
+
 
             pos++;
             // command execution
@@ -251,31 +253,34 @@ int main(void){
                     exit(-1);
                 }
 
-            } else{ // when process is a parent process
+            } else { // when process is a parent process
 
-                kill(pid , SIGUSR1);
+                kill(pid, SIGUSR1);
                 sa.sa_handler = SIG_IGN;
                 sigaction(SIGINT, &sa, NULL);
-                if(cmd_loop + 1 < cmd_cnt){
+                if (cmd_loop + 1 < cmd_cnt) {
                     continue;
                 }
 
-                for(int i = 0 ; i < pipe_cnt ;i++) { //close pipes for the parent
+                for (int i = 0; i < pipe_cnt; i++) { //close pipes for the parent
 
                     close(fds[i][0]);
                     close(fds[i][1]);
                 }
-                while (wpid=wait(&status)> 0){
-                    getrusage(RUSAGE_CHILDREN,&timeX[time_index]);
-                    printf("pid is %d\n",pid);
-                    time_tmp[time_index][0] = pid;
-                    time_tmp[time_index][1] = ind_cmd[0];
+                while (wpid = wait(&status) > 0) {
+                    getrusage(RUSAGE_CHILDREN, &timeX[time_index]);
+                    printf("pid is %d\n", pid);
+                    time_cmd[time_index]= ind_cmd[0];
+                    time_pid[time_index] = pid;
+                    time_index ++;
+                    /*
+
                     time_index++;
-                    printf("time index is %d",time_index);
-                };
+                    printf("time index is %d", time_index);
+                     */
 
                 }
-            /*
+            }/*
             while (wpid=wait(&status)>0){
                 printf("pid is %d\n", pid);
                 getrusage(RUSAGE_SELF,&timeX);
