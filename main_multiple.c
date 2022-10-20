@@ -69,7 +69,7 @@ int main(void){
 
     while(1){
         //int status; // status checking by parent process
-        struct rusage timeX;
+
         pid_t pid, wpid;
         int is_error = 0;
         char *input_cmd[MAX] = {NULL,};
@@ -157,6 +157,11 @@ int main(void){
 
         int cmd_cnt = pipe_cnt + 1;
 
+        // TIME_INDEX
+        struct rusage timeX[cmd_cnt];
+        char time_tmp[cmd_cnt][2] ={0};
+        int time_index = 0;
+
 
         if (cmd_cnt > CMD_MAX){
             printf("3230shell: Command cann be executed at most 5\n");
@@ -190,9 +195,7 @@ int main(void){
             pos++;
             // command execution
 
-
-
-                pid = fork();
+            pid = fork();
 
             if (pid <0){
                 printf("fork: error no %s\n", strerror(errno));
@@ -206,8 +209,6 @@ int main(void){
                 sigaction(SIGUSR1, &sa, NULL);
 
 
-                //
-
                 if(cmd_loop == 0 && pipe_cnt >=1){ // first pipe e.g. if pipe total 4 and first count is like fds[3] fds[2] fds[1]
 
                     for(int i = pipe_cnt - 1 ; i> cmd_loop;i--){ // when commands are 2 -> fds[0] is made
@@ -216,8 +217,6 @@ int main(void){
                     }
                     dup2(fds[cmd_loop][1], 1);//set pipe 1 write end to stdout
                     close(fds[cmd_loop][0]); // close stdin
-
-
 
                 }
                 if( 0 < cmd_loop && cmd_loop < pipe_cnt  && pipe_cnt >= 1){ // if current is 3rd commdand cmd_loop =2
@@ -248,14 +247,13 @@ int main(void){
                 }
 
                 if(execvp(ind_cmd[0],ind_cmd) == -1){
-                    printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
+                    printf("3230shell: \'%s\': %s",in_put[0],strerror(errno));
                     exit(-1);
                 }
 
             } else{ // when process is a parent process
 
                 kill(pid , SIGUSR1);
-                printf("pid is %d\n",pid);
                 sa.sa_handler = SIG_IGN;
                 sigaction(SIGINT, &sa, NULL);
                 if(cmd_loop + 1 < cmd_cnt){
@@ -267,7 +265,14 @@ int main(void){
                     close(fds[i][0]);
                     close(fds[i][1]);
                 }
-                while (wpid=wait(&status)> 0);
+                while (wpid=wait(&status)> 0){
+                    getrusage(RUSAGE_CHILDREN,&timeX[time_index]);
+                    printf("pid is %d\n",pid);
+                    time_tmp[time_index][0] = pid;
+                    time_tmp[time_index][1] = ind_cmd[0];
+                    time_index++;
+                    printf("time index is %d",time_index);
+                };
 
                 }
             /*
@@ -285,7 +290,9 @@ int main(void){
             }*/
 
             }
-
+        printf("(PID)%d   (CMD)%s   ", pid,ind_cmd[0]);
+        printf("(user)%ld.%06ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec);
+        printf("(sys)%ld.%06ld s\n",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec);
 
 
 

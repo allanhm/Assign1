@@ -73,9 +73,6 @@ int main(void){
 
         char *inputs = shell_prompt(); // prompt display
 
-        //if (strcmp(inputs,"SIGINT")==0){
-        //    continue;
-       // }
 
 
 
@@ -149,10 +146,13 @@ int main(void){
         } else{
             kill(pid, SIGUSR1);
             waitpid(pid,NULL,0);
+
+            //
             getrusage(RUSAGE_CHILDREN,&timeX);
             printf("(PID)%d   (CMD)%s", pid,in_put[0]);
             printf("(user)%ld.%06ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec);
             printf("(sys)%ld.%06ld s",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec);
+            //
             continue;
         }
 
