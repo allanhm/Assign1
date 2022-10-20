@@ -51,8 +51,7 @@ void sig_handler1(int signum){
 
 int main(void){
     int status;
-    pid_t pid;
-    int fds[5][2];
+    //pid_t pid;
 
 
     struct sigaction sa;
@@ -67,10 +66,8 @@ int main(void){
 
     while(1){
         //int status; // status checking by parent process
-
-        printf("Did you visit here? \n\n");
+        pid_t pid, wpid;
         int is_error = 0;
-
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
         char shell_cmd[MAX] ={0};
@@ -156,8 +153,6 @@ int main(void){
 
         int cmd_cnt = pipe_cnt + 1;
 
-        //printf("pipe num is %d\n",pipe_cnt);
-        printf("command num is %d\n",cmd_cnt);
 
         if (cmd_cnt > CMD_MAX){
             printf("3230shell: Command cann be executed at most 5\n");
@@ -170,9 +165,8 @@ int main(void){
 
         // 명령어 받아오기
         int fds[5][2];
-        for(int init = 0;init < pipe_cnt;init++ ){ // if pipe_cnt = 4 --> only can use fds 0,1,2,3 -->fds[4]
+        for(int init = 0;init < pipe_cnt;init++){ // if pipe_cnt = 4 --> only can use fds 0,1,2,3 -->fds[4]
             pipe(fds[init]);
-            printf("Check Check %d\n",init);
         }
 
 
@@ -190,11 +184,11 @@ int main(void){
             }
 
             pos++;
-            printf("Command Cycle \n");
             // command execution
 
 
-            pid = fork();
+
+                pid = fork();
 
             if (pid <0){
                 printf("fork: error no %s\n", strerror(errno));
@@ -211,6 +205,7 @@ int main(void){
                 //
 
                 if(cmd_loop == 0 && pipe_cnt >=1){ // first pipe e.g. if pipe total 4 and first count is like fds[3] fds[2] fds[1]
+
                     for(int i = pipe_cnt - 1 ; i> cmd_loop;i--){ // when commands are 2 -> fds[0] is made
                         close(fds[i][0]);
                         close(fds[i][1]);
@@ -259,31 +254,31 @@ int main(void){
 
                 sa.sa_handler = SIG_IGN;
                 sigaction(SIGINT, &sa, NULL);
-
-
-
                 if(cmd_loop + 1 < cmd_cnt){
-                    printf("How about here?\n\n\n");
                     continue;
                 }
-
-
-
-
-                wait(&status);
+                //wait(&status);
                 for(int i = 0 ; i < pipe_cnt ;i++) { //close pipes for the parent
 
                     close(fds[i][0]);
                     close(fds[i][1]);
                 }
 
-                printf("Testing\n\n\n");
-                break;
+                }
+            while (wpid=wait(&status)>0);
+            for(int i = 0 ; i < pipe_cnt ;i++) { //close pipes for the parent
+
+                close(fds[i][0]);
+                close(fds[i][1]);
+            }
+
             }
 
 
-        }
+
+
     }
+
 
     return 0;
 }
@@ -292,75 +287,6 @@ int main(void){
 
 
 
-
-
-
-
-
-
-
-
-
-        // 4. 돌린다.
-
-
-        /*
-        for (int loop =0; loop <= pipe_cnt; loop++){ //since loop must have to run once.
-
-            if(pipe_cnt > 1){
-                pipe(pfd1);
-                pipe(pfd2);
-            }
-            pid = fork();
-
-            if (pid <0){
-                printf("fork: error no %s\n", strerror(errno));
-                exit(-1);
-            } else if (pid == 0) {
-                while(!rec);
-
-                //signal reset
-                sa.sa_handler = SIG_DFL;
-                sigaction(SIGINT, &sa, NULL);
-                sigaction(SIGUSR1, &sa, NULL);
-                //
-                if(loop == 0 && pipe_cnt >1){ // first pipe
-                    close(pfd2[0]);
-                    close(pfd2[1]);
-                    close(pfd1[0]); //set pipe 1 write end to stdout
-
-                }
-                if(loop != pipe_cnt && pipe_cnt > 1){ // piping in between the commands.
-                    close(pfd1[1]); //close pipe1 write end
-                    close(pfd2[0]); //close pipe2 read end
-                    dup2(pfd1[0], 0); //set pipe1 read end to stdin
-                    dup2(pfd2[1], 1); //set pipe2 write end to stdout
-                }
-                if(loop == pipe_cnt && pipe_cnt > 1){
-                    close(pfd1[0]); //close pipe1
-                    close(pfd1[1]);
-                    close(pfd2[1]); //close pipe2 write end
-                    dup2(pfd2[0], 0); //set pipe2 read end to stdin
-                }
-
-
-                if(execvp(in_put[0],in_put) == -1){
-                    printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
-                    exit(-1);
-                }
-            } else{
-                kill(pid, SIGUSR1);
-
-                sa.sa_handler = SIG_IGN;
-                sigaction(SIGINT, &sa, NULL);
-
-                wait(&status);
-
-                sa.sa_handler = sig_handler1;
-                sigaction(SIGINT, &sa, NULL);
-                continue;
-            }
-        */
 
 
 
