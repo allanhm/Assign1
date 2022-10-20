@@ -192,6 +192,7 @@ int main(void){
                 index++;
                 pos++;
             }
+            time_cmd[cmd_loop]= ind_cmd[0];
 
 
             pos++;
@@ -256,6 +257,7 @@ int main(void){
             } else { // when process is a parent process
 
                 kill(pid, SIGUSR1);
+                time_pid[cmd_loop] = pid;
                 sa.sa_handler = SIG_IGN;
                 sigaction(SIGINT, &sa, NULL);
                 if (cmd_loop + 1 < cmd_cnt) {
@@ -269,9 +271,8 @@ int main(void){
                 }
                 while (wpid = wait(&status) > 0) {
                     getrusage(RUSAGE_CHILDREN, &timeX[time_index]);
-                    time_cmd[time_index]= ind_cmd[0];
-                    time_pid[time_index] = pid;
-                    time_index ++;
+                    time_index++;
+
                 }
             }/*
  *
@@ -288,9 +289,9 @@ int main(void){
 
             }
         for (int i = 0; i< time_index; i++){
-            printf("(PID)%d   (CMD)%s", time_pid[i],time_cmd[i]);
-            printf("(user)%ld.%06ld s", timeX[i].ru_utime.tv_sec,timeX[i].ru_utime.tv_usec);
-            printf("(sys)%ld.%06ld s\n",timeX[i].ru_stime.tv_sec, timeX[i].ru_stime.tv_usec);
+            printf("(PID)%d   (CMD)%s   ", time_pid[i],time_cmd[i]);
+            printf("(user)%ld.%03ld s   ", timeX[i].ru_utime.tv_sec,timeX[i].ru_utime.tv_usec);
+            printf("(sys)%ld.%03ld s\n",timeX[i].ru_stime.tv_sec, timeX[i].ru_stime.tv_usec);
         }
         /*
         printf("(PID)%d   (CMD)%s   ", pid,ind_cmd[0]);
