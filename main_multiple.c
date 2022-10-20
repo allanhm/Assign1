@@ -1,3 +1,5 @@
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -78,6 +80,7 @@ int main(void){
         char shell_cmd[MAX] ={0};
 
         int iter = 0 , pipe_cnt =0;
+        int input_idx = 0;
 
 
         char *inputs = shell_prompt(shell_cmd);
@@ -117,12 +120,14 @@ int main(void){
         }
 
         if (strcmp(input_cmd[0],"timeX") == 0){
-            if (iter == 1){
-                printf("3230shell: \"timeX\" cannot be a standalone command\n");
-                continue;
+            if (iter > 1){
+                is_timeX = 1;
+
             }
             else{
-                is_timeX = 1; // set to get the variables.
+                printf("3230shell: \"timeX\" cannot be a standalone command\n");
+                continue;
+                 // set to get the variables.
             }
         }
 
@@ -155,19 +160,14 @@ int main(void){
 
         // 3. pipe 확인한 이후에 명령어를 별도로 뽑아낸다.
 
-        int input_idx = 0;
-        if(is_timeX == 1){
-            ptintf("input_cmd[0] is %s",input_cmd[input_idx]);
-            exit(0);
-        }else{
-            while(input_idx < iter){
-                in_put[input_idx] = input_cmd[input_idx];
-                if(strcmp(in_put[input_idx],"|") == 0)
-                    pipe_cnt++;
-                input_idx++;
-            }
-        }
 
+        while(input_idx < iter -is_timeX){
+            in_put[input_idx] = input_cmd[input_idx + is_timeX];
+            if(strcmp(in_put[input_idx],"|") == 0){
+                pipe_cnt++;
+            }
+            input_idx++;
+            }
 
 
         int cmd_cnt = pipe_cnt + 1;
@@ -178,14 +178,11 @@ int main(void){
         char *time_cmd[5];
         int time_index = 0;
 
-
         if (cmd_cnt > CMD_MAX){
             printf("3230shell: Command cann be executed at most 5\n");
             continue;
         }
 
-
-        //printf("j is %d\n\n",j);
 
 
 
@@ -197,16 +194,17 @@ int main(void){
 
 
         int pos =0;
-
         for (int cmd_loop = 0; cmd_loop < cmd_cnt; cmd_loop++) {  // condition 1) when command is 1 (O) 2) when command is 2 3) when command is more than 2
             char *ind_cmd[30] = {NULL,};
             int index = 0;
+
 
             while (pos < input_idx && strcmp(in_put[pos], "|") != 0 ) {
                 ind_cmd[index] = in_put[pos];
                 index++;
                 pos++;
             }
+
             if(is_timeX ==1)
                 time_cmd[cmd_loop]= ind_cmd[0];
 
@@ -266,8 +264,8 @@ int main(void){
                 }
 
                 if(execvp(ind_cmd[0],ind_cmd) == -1){
-                    printf("3230shell: \'%s\': %s",in_put[0],strerror(errno));
-                    exit(-1);
+                    printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
+                    break;
                 }
 
             } else { // when process is a parent process
@@ -297,8 +295,8 @@ int main(void){
         for (int i = 0; i< time_index; i++){
             if(is_timeX ==1){
                 printf("(PID)%d   (CMD)%s   ", time_pid[i],time_cmd[i]);
-                printf("(user)%ld.%06ld s   ", timeX[i].ru_utime.tv_sec,timeX[i].ru_utime.tv_usec);
-                printf("(sys)%ld.%06ld s\n",timeX[i].ru_stime.tv_sec, timeX[i].ru_stime.tv_usec);
+                printf("(user)%ld.%03ld s   ", timeX[i].ru_utime.tv_sec,timeX[i].ru_utime.tv_usec/1000);
+                printf("(sys)%ld.%03ld s\n",timeX[i].ru_stime.tv_sec, timeX[i].ru_stime.tv_usec/1000);
             }
 
         }

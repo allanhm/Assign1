@@ -150,8 +150,8 @@ int main(void){
             //
             getrusage(RUSAGE_CHILDREN,&timeX);
             printf("(PID)%d   (CMD)%s", pid,in_put[0]);
-            printf("(user)%ld.%06ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec);
-            printf("(sys)%ld.%06ld s",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec);
+            printf("(user)%ld.%03ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec/1000);
+            printf("(sys)%ld.%03ld s",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec/1000);
             //
             continue;
         }
