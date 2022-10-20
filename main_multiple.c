@@ -290,10 +290,11 @@ int main(void){
             }*/
 
             }
+        /*
         printf("(PID)%d   (CMD)%s   ", pid,ind_cmd[0]);
         printf("(user)%ld.%06ld s", timeX.ru_utime.tv_sec,timeX.ru_utime.tv_usec);
         printf("(sys)%ld.%06ld s\n",timeX.ru_stime.tv_sec, timeX.ru_stime.tv_usec);
-
+        */
 
 
     }
