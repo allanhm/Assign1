@@ -181,8 +181,8 @@ int main(void){
         }
 
 
-
-        for (int cmd_loop = 0; cmd_loop < cmd_cnt; cmd_loop++) {
+        int pipe_index = 0;
+        for (int cmd_loop = 1; cmd_loop <= cmd_cnt; cmd_loop++) {
             printf("check\n\n\n\"");
             char *ind_cmd[30] = {NULL,};
             int index = 0;// command 선
@@ -194,9 +194,12 @@ int main(void){
                 pos++;
 
             }
+
             pos++;
+            printf("Command Cycle \n");
             // command execution
 
+            /*
             pid = fork();
 
             if (pid  <0){
@@ -210,39 +213,39 @@ int main(void){
                 sigaction(SIGINT, &sa, NULL);
                 sigaction(SIGUSR1, &sa, NULL);
                 //
-                if(cmd_loop == 0 && pipe_cnt >=1){ // first pipe e.g. if pipe total 4 and first count is like fds[3] fds[2] fds[1]
-                    for(int i = pipe_cnt - 1 ; i> cmd_loop;i--){
+                if(cmd_loop == 1 && pipe_cnt >=1){ // first pipe e.g. if pipe total 4 and first count is like fds[3] fds[2] fds[1]
+                    for(int i = pipe_cnt - 1 ; i> cmd_loop-1;i--){
                         close(fds[i][0]);
                         close(fds[i][1]);
                     }
-                    close(fds[cmd_loop][0]) // close stdin
+                    close(fds[cmd_loop-1][0]); // close stdin
 
-                    dup2(pfd1[cmd_loop][1], 1);//set pipe 1 write end to stdout
+                    dup2(fds[cmd_loop-1][1], 1);//set pipe 1 write end to stdout
 
                 }
-                if( 0 < cmd_loop && cmd_loop < pipe_cnt && pipe_cnt >= 1){ // if current is 3rd commdand cmd_loop =2
-                    for(int i = pipe_cnt - 1  ; i> cmd_loop;i--){ // fds[3] closed
+                if( 1 < cmd_loop && cmd_loop < pipe_cnt  && pipe_cnt >= 1){ // if current is 3rd commdand cmd_loop =2
+                    for(int i = pipe_cnt - 1  ; i> cmd_loop -1;i--){ // fds[3] closed
                         close(fds[i][0]);
                         close(fds[i][1]);
                     }
-                    for(int i = 0 ; i < cmd_loop - 1 ;i++){ //fds[0]
+                    for(int i = 0 ; i < cmd_loop - 2 ;i++){ //fds[0]
                         close(fds[i][0]);
                         close(fds[i][1]);
                     }
                     // fds[1] fds[2] left
-                    close(fds[cmd_loop-1][1]);
-                    close(fds[cmd_loop][0]);
-                    dup2(fds[cmd_loop-1][0],0);
-                    dup2(fds[cmd_loop][1],1);
+                    close(fds[cmd_loop-2][1]);
+                    close(fds[cmd_loop-1][0]);
+                    dup2(fds[cmd_loop-2][0],0);
+                    dup2(fds[cmd_loop-1][1],1);
                 }
                 if(cmd_loop == pipe_cnt && pipe_cnt >= 1){ // if 4th cmd loop 3
 
-                    for(int i = 0 ; i < cmd_loop -1;i++){
+                    for(int i = 0 ; i < cmd_loop -2;i++){
                         close(fds[i][0]);
                         close(fds[i][1]);
                     }
-                    close(fds[cmd_loop][1],1);
-                    dup2(fds[cmd_loop[0],0]);
+                    close(fds[cmd_loop-1][1]);
+                    dup2(fds[cmd_loop-1][0],0);
                 }
 
                 if(execvp(ind_cmd[0],ind_cmd) == -1){
@@ -253,11 +256,13 @@ int main(void){
                 kill(pid , SIGUSR1);
                 sa.sa_handler = SIG_IGN;
                 sigaction(SIGINT, &sa, NULL);
-                if(cmd_loop < cmd_cnt){
+                if(cmd_loop <= cmd_cnt){
                     continue;
                 }
                 wait(&status);
+                */
             }
+
 
         }
 
