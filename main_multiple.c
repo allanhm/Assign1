@@ -72,6 +72,7 @@ int main(void){
 
         pid_t pid, wpid;
         int is_error = 0;
+        int is_timeX =0;
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
         char shell_cmd[MAX] ={0};
@@ -115,6 +116,16 @@ int main(void){
             }
         }
 
+        if (strcmp(input_cmd[0],"time X") == 0){
+            if (i == 1){
+                printf("3230shell: \"timeX\" cannot be a standalone command\n");
+                continue;
+            }
+            else{
+                is_timeX = 1; // set to get the variables.
+            }
+        }
+
 
         // 2. pipe 오류를 확인한다.
 
@@ -145,13 +156,16 @@ int main(void){
 
         // 3. pipe 확인한 이후에 명령어를 별도로 뽑아낸다.
 
-        int j = 0;
+        int input_idx = 0;
+        if(is_timeX == 1){
+            input_idx = 1;
+        }
 
-        while(j < i){
-            in_put[j] = input_cmd[j];
-            if(strcmp(in_put[j],"|") == 0)
+        while(input_idx < i){
+            in_put[input_idx] = input_cmd[input_idx];
+            if(strcmp(in_put[input_idx],"|") == 0)
                 pipe_cnt++;
-            j++;
+            input_idx++;
         }
 
 
@@ -173,7 +187,7 @@ int main(void){
         //printf("j is %d\n\n",j);
 
 
-        // 명령어 받아오기
+
         int fds[5][2];
         for(int init = 0;init < pipe_cnt;init++){ // if pipe_cnt = 4 --> only can use fds 0,1,2,3 -->fds[4]
             pipe(fds[init]);
@@ -187,12 +201,13 @@ int main(void){
             char *ind_cmd[30] = {NULL,};
             int index = 0;
 
-            while (pos < j && strcmp(in_put[pos], "|") != 0 ) {
+            while (pos < input_idx && strcmp(in_put[pos], "|") != 0 ) {
                 ind_cmd[index] = in_put[pos];
                 index++;
                 pos++;
             }
-            time_cmd[cmd_loop]= ind_cmd[0];
+            if(is_timeX ==1)
+                time_cmd[cmd_loop]= ind_cmd[0];
 
 
             pos++;
@@ -274,24 +289,17 @@ int main(void){
                     time_index++;
 
                 }
-            }/*
- *
-            while (wpid=wait(&status)>0){
-                printf("pid is %d\n", pid);
-                getrusage(RUSAGE_SELF,&timeX);
-
-            };
-            for(int i = 0 ; i < pipe_cnt ;i++) { //close pipes for the parent
-
-                close(fds[i][0]);
-                close(fds[i][1]);
-            }*/
 
             }
+        }
+
         for (int i = 0; i< time_index; i++){
-            printf("(PID)%d   (CMD)%s   ", time_pid[i],time_cmd[i]);
-            printf("(user)%ld.%03ld s   ", timeX[i].ru_utime.tv_sec,timeX[i].ru_utime.tv_usec);
-            printf("(sys)%ld.%03ld s\n",timeX[i].ru_stime.tv_sec, timeX[i].ru_stime.tv_usec);
+            if(is_timeX ==1){
+                printf("(PID)%d   (CMD)%s   ", time_pid[i],time_cmd[i]);
+                printf("(user)%ld.%06ld s   ", timeX[i].ru_utime.tv_sec,timeX[i].ru_utime.tv_usec);
+                printf("(sys)%ld.%06ld s\n",timeX[i].ru_stime.tv_sec, timeX[i].ru_stime.tv_usec);
+            }
+
         }
         /*
         printf("(PID)%d   (CMD)%s   ", pid,ind_cmd[0]);
