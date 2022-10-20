@@ -40,6 +40,7 @@ void sig_handler1(int signum){
     if(signum == SIGUSR1){
         rec = 1;
     }
+
     if(signum == SIGINT){
         reset = 1;
     }
@@ -65,17 +66,16 @@ int main(void){
     sigaction(SIGUSR1, &sa, NULL);
 
     while(1){
-        int status; // status checking by parent process
+        //int status; // status checking by parent process
 
+        printf("Did you visit here? \n\n");
         int is_error = 0;
 
         char *input_cmd[MAX] = {NULL,};
         char *in_put[MAX] ={NULL,};
         char shell_cmd[MAX] ={0};
 
-        int i = 0 , pipe_cnt =0, cmd_cnt = 0;
-
-
+        int i = 0 , pipe_cnt =0;
 
 
         char *inputs = shell_prompt(shell_cmd);
@@ -92,7 +92,6 @@ int main(void){
         // 1. command parse 한다.
 
         input_cmd[0] = strtok(inputs," ");
-        printf("%s\n",input_cmd[0]);
 
         while(input_cmd[i] != NULL){
             i++;
@@ -155,10 +154,10 @@ int main(void){
         }
 
 
-        cmd_cnt = pipe_cnt + 1;
+        int cmd_cnt = pipe_cnt + 1;
 
         //printf("pipe num is %d\n",pipe_cnt);
-        //printf("command num is %d\n",cmd_cnt);
+        printf("command num is %d\n",cmd_cnt);
 
         if (cmd_cnt > CMD_MAX){
             printf("3230shell: Command cann be executed at most 5\n");
@@ -166,24 +165,18 @@ int main(void){
         }
 
 
-
-
-        printf("j is %d\n\n",j);
+        //printf("j is %d\n\n",j);
 
 
         // 명령어 받아오기
-
-
-
-
-
+        int fds[5][2];
         for(int init = 0;init < pipe_cnt;init++ ){ // if pipe_cnt = 4 --> only can use fds 0,1,2,3 -->fds[4]
             pipe(fds[init]);
-            printf("%d\n",init);
+            printf("Check Check %d\n",init);
         }
 
 
-        int pipe_index = 0;
+
         int pos =0;
 
         for (int cmd_loop = 0; cmd_loop < cmd_cnt; cmd_loop++) {  // condition 1) when command is 1 (O) 2) when command is 2 3) when command is more than 2
@@ -191,9 +184,7 @@ int main(void){
             int index = 0;
 
             while (pos < j && strcmp(in_put[pos], "|") != 0 ) {
-                printf("pos is %s\n",in_put[pos]);
                 ind_cmd[index] = in_put[pos];
-                printf(" ind_cmd is %s\n", ind_cmd[index]);
                 index++;
                 pos++;
             }
@@ -205,7 +196,7 @@ int main(void){
 
             pid = fork();
 
-            if (pid  <0){
+            if (pid <0){
                 printf("fork: error no %s\n", strerror(errno));
                 exit(-1);
             } else if (pid == 0) {
@@ -215,6 +206,8 @@ int main(void){
                 sa.sa_handler = SIG_DFL;
                 sigaction(SIGINT, &sa, NULL);
                 sigaction(SIGUSR1, &sa, NULL);
+
+
                 //
 
                 if(cmd_loop == 0 && pipe_cnt >=1){ // first pipe e.g. if pipe total 4 and first count is like fds[3] fds[2] fds[1]
@@ -222,9 +215,10 @@ int main(void){
                         close(fds[i][0]);
                         close(fds[i][1]);
                     }
+                    dup2(fds[cmd_loop][1], 1);//set pipe 1 write end to stdout
                     close(fds[cmd_loop][0]); // close stdin
 
-                    dup2(fds[cmd_loop][1], 1);//set pipe 1 write end to stdout
+
 
                 }
                 if( 0 < cmd_loop && cmd_loop < pipe_cnt  && pipe_cnt >= 1){ // if current is 3rd commdand cmd_loop =2
@@ -237,10 +231,11 @@ int main(void){
                         close(fds[i][1]);
                     }
                     // fds[1] fds[2] left
-                    close(fds[cmd_loop-1][1]); // fds[1]
-                    close(fds[cmd_loop][0]);
                     dup2(fds[cmd_loop-1][0],0);
                     dup2(fds[cmd_loop-0][1],1);
+                    close(fds[cmd_loop-1][1]); // fds[1]
+                    close(fds[cmd_loop][0]);
+
                 }
                 if(cmd_loop == pipe_cnt && pipe_cnt >= 1){ // when commands are 5 and we are concerning 3rd cmd cmd_loop is 2 and pipe is 4
 
@@ -248,32 +243,50 @@ int main(void){
                         close(fds[i][0]);
                         close(fds[i][1]);
                     }
-                    close(fds[cmd_loop-1][1]);
                     dup2(fds[cmd_loop-1][0],0);
+                    close(fds[cmd_loop-1][1]);
+
                 }
 
                 if(execvp(ind_cmd[0],ind_cmd) == -1){
                     printf("3230shell: \'%s\': %s\n",in_put[0],strerror(errno));
                     exit(-1);
                 }
-            } else{
+
+            } else{ // when process is a parent process
+
                 kill(pid , SIGUSR1);
+
                 sa.sa_handler = SIG_IGN;
                 sigaction(SIGINT, &sa, NULL);
+
+
+
                 if(cmd_loop + 1 < cmd_cnt){
+                    printf("How about here?\n\n\n");
                     continue;
                 }
-                wait(&status);
 
+
+
+
+                wait(&status);
+                for(int i = 0 ; i < pipe_cnt ;i++) { //close pipes for the parent
+
+                    close(fds[i][0]);
+                    close(fds[i][1]);
+                }
+
+                printf("Testing\n\n\n");
+                break;
             }
 
 
         }
+    }
 
-
-
-
-        //for (int cmd_loop = 0; cmd_loop < cmd_cnt; cmd_loop++){
+    return 0;
+}
 
 
 
@@ -348,10 +361,7 @@ int main(void){
                 continue;
             }
         */
-        }
 
-    return 0;
-    }
 
 
 
